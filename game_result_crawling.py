@@ -38,7 +38,7 @@ def game_crawling(year, month):
                     
             print(f"{file_path} 파일로 저장 완료!")
         else:
-            print(f"{month}월 데이터가 없습니다.")
+            print(f"{year}년 {month}월 데이터가 없습니다.")
     else:
         print(f"API 요청 실패 ({month}월), 상태 코드: {response.status_code}")
 
