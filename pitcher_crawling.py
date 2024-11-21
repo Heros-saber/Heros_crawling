@@ -43,9 +43,9 @@ def getPlayerId(name):
     return player_id
 
 def crawling(player_id, name):
-    mapping = {"4":"스윙율", "5":"컨택율", "6":"타율", "9":"ops"}
+    mapping = {"1":"구사율", "6":"타율"}
     for key, element in mapping.items():
-        url = f"https://statiz.sporki.com/player/?m=analysis&p_no={player_id}&pos=batting&year=2024&si1=3&si2={key}"
+        url = f"https://statiz.sporki.com/player/?m=analysis&p_no={player_id}&pos=pitching&year=2024&si1=3&si2={key}"
 
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -98,35 +98,31 @@ def crawling(player_id, name):
         df.to_csv(f"{name}_zone_{element}.csv", index=False, encoding='utf-8-sig')
         print(f"{name}_zone_{element}.csv 파일이 저장되었습니다.")
 
-def preprocessing(name):
-    files = ['_zone_타율.csv', '_zone_ops.csv', '_zone_컨택율.csv', '_zone_스윙율.csv']
-    index_list = ['타율 - ', 'OPS - ', 'Contact% - ', 'Swing% - '] 
-    removing_index = ['너클볼', '우언', '주자없음', '주자있음', '득점권', '구종모름']
+def preprocessing(playerName):
+    index_list = ['구사율 - ', '타율 - ']
+    removing_index = ['너클볼', '우언', '주자없음', '주자있음', '득점권', '양타', '구종모름']
     count_index = ['초구', '스트라이크 > 볼', '볼 > 스트라이크', '스트라이크 = 볼']
     fast_ball_index = ['투심', '포심', '커터']
     droping_columns = ['PA_' + str(i+1) for i in range(25)]
+    files = ['_zone_구사율.csv', '_zone_타율.csv']
 
-    
-    for i in range(4):
+    for i in range(2):
         # 파일 읽기
-        df = pd.read_csv(name + files[i])
-        df = df.drop(columns=droping_columns)
+        df = pd.read_csv(playerName + files[i])
+        df = df.drop(columns=droping_columns, errors='ignore')
 
-        # 첫 번째 열의 문자열에서 index_list[i] 제거
         df.iloc[:, 0] = df.iloc[:, 0].apply(lambda x: x.replace(index_list[i], '') if index_list[i] in x else x)
 
         # 제거할 행 필터링 (첫 번째 열의 값이 `removing_index`에 포함된 경우)
-        removing_rows = [index for index in removing_index]
-        df = df[~df.iloc[:, 0].isin(removing_rows)]
+        df = df[~df.iloc[:, 0].isin(removing_index)]
 
         # count 행을 합쳐서 하나의 행으로 만들기
-        count_rows = [index for index in count_index]
-        if all(row in df.iloc[:, 0].values for row in count_rows):
-            count_sum = df[df.iloc[:, 0].isin(count_rows)].iloc[:, 1:].mean()
+        if all(row in df.iloc[:, 0].values for row in count_index):
+            count_sum = df[df.iloc[:, 0].isin(count_index)].iloc[:, 1:].mean()
             count_sum = count_sum.round(3)
             count_sum_row = pd.DataFrame([['카운트'] + count_sum.tolist()], columns=df.columns)
             df = pd.concat([df, count_sum_row], ignore_index=True)
-            df = df[~df.iloc[:, 0].isin(count_rows)]
+            df = df[~df.iloc[:, 0].isin(count_index)]
 
         existing_fast_ball = [row for row in fast_ball_index if row in df.iloc[:, 0].values]
         if existing_fast_ball:  # 존재하는 값이 하나라도 있다면
@@ -140,14 +136,12 @@ def preprocessing(name):
             df = df[~df.iloc[:, 0].isin(existing_fast_ball)]  # 기존 행 삭제
 
         df.loc[df.iloc[:, 0] == '2S 이후', df.columns[0]] = '결정구'
-        df.to_csv(name + files[i], index=False)
+        df.to_csv(playerName + files[i], index=False)
+
         
 def main(name):
-    if name != '김도영':
-        player_id = getPlayerId(name)
-    else:
-        player_id = 15056
-    crawling(player_id=player_id, name=name)
+    player_id = getPlayerId(name)
+    crawling(player_id=14113, name=name)
     preprocessing(name)
 
 if __name__ == "__main__":
