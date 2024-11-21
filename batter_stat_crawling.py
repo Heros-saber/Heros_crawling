@@ -5,7 +5,7 @@ import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager  # 자동으로 크롬 드라이버 다운로드
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 import re
 from datetime import datetime
@@ -13,7 +13,7 @@ from datetime import datetime
 def getPlayerId(name):
     chrome_options = Options()
     # chrome_options.add_argument("--headless")  # 브라우저 UI를 띄우지 않음
-    chrome_options.add_argument("--disable-gpu")  # GPU 가속 비활성화 (headless 모드에서 필요할 수 있음)
+    chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox") 
 
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
@@ -39,7 +39,7 @@ def getPlayerId(name):
     return player_id
 
 def crawling(player_id, playerName):
-    url = f"https://statiz.sporki.com/player/?m=year&p_no={player_id}"  # 실제 URL로 변경
+    url = f"https://statiz.sporki.com/player/?m=year&p_no={player_id}"
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
     table = soup.find("table")
@@ -53,7 +53,6 @@ def crawling(player_id, playerName):
         if len(cells) > 0:
             year = cells[0].text.strip()
             
-            # 필요한 값들을 문자열에서 실수로 변환
             avg = float(cells[26].text.strip()) if cells[26].text.strip() else 0.0
             obp = float(cells[27].text.strip()) if cells[27].text.strip() else 0.0
             slg = float(cells[28].text.strip()) if cells[28].text.strip() else 0.0
@@ -75,8 +74,7 @@ def crawling(player_id, playerName):
 
             # bb, hp, ib를 더하고 bb로만 남기기
             bb = bb + hp + ib
-
-            # 데이터 추가
+            
             data.append([year, avg, obp, slg, ops, wrc_plus, h, two_b, three_b, hr, rbi, sb, bb, so, pa, ab, war])
 
     df = pd.DataFrame(data, columns=columns)

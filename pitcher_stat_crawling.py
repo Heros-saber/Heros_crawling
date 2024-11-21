@@ -5,7 +5,7 @@ import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager  # 자동으로 크롬 드라이버 다운로드
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 import re
 from datetime import datetime
@@ -13,7 +13,7 @@ from datetime import datetime
 def getPlayerId(name):
     chrome_options = Options()
     # chrome_options.add_argument("--headless")  # 브라우저 UI를 띄우지 않음
-    chrome_options.add_argument("--disable-gpu")  # GPU 가속 비활성화 (headless 모드에서 필요할 수 있음)
+    chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox") 
 
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
@@ -39,11 +39,10 @@ def getPlayerId(name):
     return player_id
 
 def crawling(player_id, playerName):
-    url = f"https://statiz.sporki.com/player/?m=year&p_no={player_id}"  # 실제 URL로 변경
+    url = f"https://statiz.sporki.com/player/?m=year&p_no={player_id}"
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
 
-    # 데이터 추출
     table = soup.find("table")
     rows = table.find("tbody").find_all("tr")
 
@@ -54,8 +53,7 @@ def crawling(player_id, playerName):
         cells = row.find_all("td")
         if len(cells) > 0:
             year = cells[0].text.strip()
-            
-            # 필요한 값들을 문자열에서 실수로 변환
+
             games = int(cells[4].text.strip()) if cells[4].text.strip() else 0
             win = int(cells[10].text.strip()) if cells[10].text.strip() else 0
             lose = int(cells[11].text.strip()) if cells[11].text.strip() else 0
