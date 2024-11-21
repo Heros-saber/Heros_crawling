@@ -141,7 +141,7 @@ def preprocessing(playerName):
         
 def main(name):
     player_id = getPlayerId(name)
-    crawling(player_id=14113, name=name)
+    crawling(player_id=player_id, name=name)
     preprocessing(name)
 
 if __name__ == "__main__":
