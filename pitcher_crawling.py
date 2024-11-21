@@ -118,18 +118,13 @@ def player_zone_crawling(player_id, name):
                     avg = item.find('strong').get_text(strip=True)
                     batting_averages.append(avg)
 
-                    pa_text = item.find('span').get_text(strip=True)
-                    pa_value = pa_text.split()[-1] if "PA" in pa_text else None
-                    pa_values.append(pa_value)
-
                 if len(batting_averages) < 25:
                     batting_averages.extend([None] * (25 - len(batting_averages)))
-                    pa_values.extend([None] * (25 - len(pa_values)))
                 
-                row = [title_text] + batting_averages[:25] + pa_values[:25]
+                row = [title_text] + batting_averages[:25]
                 tables_data.append(row)
         
-        columns = [element] + [f"{element}_{i}" for i in range(1, 26)] + [f"PA_{i}" for i in range(1, 26)]
+        columns = [element] + [f"{element}_{i}" for i in range(1, 26)]
         df = pd.DataFrame(tables_data, columns=columns)
 
         df.to_csv(f"{name}_zone_{element}.csv", index=False, encoding='utf-8-sig')
@@ -140,13 +135,10 @@ def preprocessing(playerName):
     removing_index = ['너클볼', '우언', '주자없음', '주자있음', '득점권', '양타', '구종모름']
     count_index = ['초구', '스트라이크 > 볼', '볼 > 스트라이크', '스트라이크 = 볼']
     fast_ball_index = ['투심', '포심', '커터', '싱커']
-    droping_columns = ['PA_' + str(i+1) for i in range(25)]
     files = ['_zone_구사율.csv', '_zone_타율.csv']
 
     for i in range(2):
         df = pd.read_csv(playerName + files[i])
-        df = df.drop(columns=droping_columns, errors='ignore')
-
         df.iloc[:, 0] = df.iloc[:, 0].apply(lambda x: x.replace(index_list[i], '') if index_list[i] in x else x)
 
         df = df[~df.iloc[:, 0].isin(removing_index)]

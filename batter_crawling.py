@@ -122,7 +122,7 @@ def player_zone_crawling(player_id, name):
                 row = [title_text] + batting_averages[:25]
                 tables_data.append(row)
     
-        columns = [element] + [f"{element}_{i}" for i in range(1, 26)] + [f"PA_{i}" for i in range(1, 26)]
+        columns = [element] + [f"{element}_{i}" for i in range(1, 26)]
         df = pd.DataFrame(tables_data, columns=columns)
 
         df.to_csv(f"{name}_zone_{element}.csv", index=False, encoding='utf-8-sig')
@@ -134,12 +134,10 @@ def preprocessing(name):
     removing_index = ['너클볼', '우언', '주자없음', '주자있음', '득점권', '구종모름']
     count_index = ['초구', '스트라이크 > 볼', '볼 > 스트라이크', '스트라이크 = 볼']
     fast_ball_index = ['투심', '포심', '커터', '싱커']
-    droping_columns = ['PA_' + str(i+1) for i in range(25)]
 
     
     for i in range(4):
         df = pd.read_csv(name + files[i])
-        df = df.drop(columns=droping_columns)
 
         df.iloc[:, 0] = df.iloc[:, 0].apply(lambda x: x.replace(index_list[i], '') if index_list[i] in x else x)
 
